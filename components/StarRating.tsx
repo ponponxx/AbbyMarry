@@ -9,11 +9,19 @@ type StarRatingProps = {
 
 export default function StarRating({ labelZh, labelDe, value, onChange }: StarRatingProps) {
   return (
-    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between lg:gap-3 min-[2400px]:gap-4!">
+    <div
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      style={{ gap: "clamp(0.25rem,0.2rem+0.3vw,1rem)" }}
+    >
       <span className="field-label">
         {labelZh} / {labelDe}
       </span>
-      <div className="flex gap-1 lg:gap-2 min-[2400px]:gap-3!" role="radiogroup" aria-label={`${labelZh} / ${labelDe}`}>
+      <div
+        className="flex"
+        style={{ gap: "clamp(0.25rem,0.2rem+0.3vw,0.75rem)" }}
+        role="radiogroup"
+        aria-label={`${labelZh} / ${labelDe}`}
+      >
         {[1, 2, 3, 4, 5].map((star) => {
           const filled = star <= value;
           return (
@@ -24,9 +32,14 @@ export default function StarRating({ labelZh, labelDe, value, onChange }: StarRa
               aria-checked={filled}
               aria-label={`${star} 星 / ${star} Sterne`}
               onClick={() => onChange(star)}
-              className={`flex h-11 w-11 items-center justify-center rounded-full text-3xl leading-none transition-transform active:scale-90 lg:h-14 lg:w-14 lg:text-4xl min-[2400px]:h-20! min-[2400px]:w-20! min-[2400px]:text-6xl! ${
+              className={`flex items-center justify-center rounded-full leading-none transition-transform active:scale-90 ${
                 filled ? "text-gold-500" : "text-rose-100"
               }`}
+              style={{
+                height: "clamp(2.75rem,2.2rem+2vw,5.5rem)",
+                width: "clamp(2.75rem,2.2rem+2vw,5.5rem)",
+                fontSize: "clamp(1.875rem,1.5rem+1.3vw,3.75rem)",
+              }}
             >
               ★
             </button>

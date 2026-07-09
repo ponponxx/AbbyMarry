@@ -13,13 +13,23 @@
   --gold-400: #e8c468;
   --gold-500: #d4a437;
   --cream: #fdf6f0;
-}
 
-/* Large-display scaling (e.g. casting/mirroring to a 3840x2160 TV for the reveal)
-   uses Tailwind's arbitrary-value breakpoint variant `min-[2400px]:` directly on
-   utilities below, rather than a named theme breakpoint, since named custom
-   breakpoints were not sorting correctly after `sm`/`md`/`lg` in this Tailwind
-   version's cascade output. */
+  /* Fluid type/spacing scale: continuous clamp()-based sizing instead of
+     discrete breakpoint tiers, so there's no "gap" viewport width where the
+     UI lands between two hand-tuned steps and looks too small. Scales
+     smoothly all the way from a phone up to a 3840px TV. */
+  --text-hero: clamp(1.5rem, 0.9rem + 2.1vw, 6rem);
+  --text-subtitle: clamp(1.125rem, 0.85rem + 1vw, 3rem);
+  --text-heading: clamp(1.25rem, 0.9rem + 1.2vw, 4rem);
+  --text-body: clamp(0.875rem, 0.8rem + 0.35vw, 2rem);
+  --text-small: clamp(0.75rem, 0.7rem + 0.25vw, 1.5rem);
+  --text-button: clamp(1rem, 0.9rem + 0.5vw, 2.5rem);
+  --text-score: clamp(1.5rem, 0.8rem + 2.5vw, 7rem);
+
+  --space-card-padding: clamp(1.25rem, 1rem + 2vw, 5rem);
+  --space-gap: clamp(1rem, 0.6rem + 1.4vw, 3.5rem);
+  --space-gap-sm: clamp(0.5rem, 0.3rem + 0.7vw, 1.75rem);
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -45,26 +55,43 @@ body {
 
 @layer components {
   .game-card {
-    @apply rounded-3xl bg-white/90 shadow-xl shadow-rose-200/40 ring-1 ring-rose-100 backdrop-blur-sm lg:rounded-[2rem] min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-2!;
+    @apply bg-white/90 shadow-xl shadow-rose-200/40 ring-1 ring-rose-100 backdrop-blur-sm;
+    border-radius: clamp(1.5rem, 1.2rem + 1vw, 2.5rem);
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 font-bold shadow-lg transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50;
+    min-height: clamp(3.25rem, 2.6rem + 2vw, 6rem);
+    border-radius: clamp(1rem, 0.85rem + 0.5vw, 1.75rem);
+    padding-inline: clamp(1.25rem, 0.9rem + 1.5vw, 3rem);
+    padding-block: clamp(0.85rem, 0.6rem + 1vw, 2rem);
+    font-size: var(--text-button);
   }
 
   .btn-primary {
-    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg lg:min-h-16 lg:rounded-2xl lg:px-8 lg:py-5 lg:text-xl min-[2400px]:min-h-24! min-[2400px]:rounded-3xl! min-[2400px]:px-12! min-[2400px]:py-8! min-[2400px]:text-4xl! bg-gradient-to-r from-rose-500 to-rose-400 text-white shadow-rose-300/50 hover:brightness-105;
+    @apply bg-gradient-to-r from-rose-500 to-rose-400 text-white shadow-rose-300/50 hover:brightness-105;
   }
 
   .btn-secondary {
-    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg lg:min-h-16 lg:rounded-2xl lg:px-8 lg:py-5 lg:text-xl min-[2400px]:min-h-24! min-[2400px]:rounded-3xl! min-[2400px]:px-12! min-[2400px]:py-8! min-[2400px]:text-4xl! min-[2400px]:ring-4! bg-white text-rose-600 ring-2 ring-rose-300 hover:bg-rose-50;
+    @apply bg-white text-rose-600 ring-2 ring-rose-300 hover:bg-rose-50;
   }
 
   .btn-gold {
-    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg lg:min-h-16 lg:rounded-2xl lg:px-8 lg:py-5 lg:text-xl min-[2400px]:min-h-24! min-[2400px]:rounded-3xl! min-[2400px]:px-12! min-[2400px]:py-8! min-[2400px]:text-4xl! bg-gradient-to-r from-gold-500 to-gold-300 text-[#5b3d0a] shadow-gold-400/40 hover:brightness-105;
+    @apply bg-gradient-to-r from-gold-500 to-gold-300 text-[#5b3d0a] shadow-gold-400/40 hover:brightness-105;
   }
 
   .field-label {
-    @apply block text-sm font-semibold text-rose-700 sm:text-base lg:text-lg min-[2400px]:text-2xl!;
+    @apply block font-semibold text-rose-700;
+    font-size: var(--text-body);
   }
 
   .field-select {
-    @apply mt-1 block w-full min-h-12 rounded-xl border-2 border-rose-200 bg-white px-3 py-2 text-base text-foreground shadow-sm outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-200 lg:min-h-14 lg:rounded-xl lg:border-2 lg:px-4 lg:py-3 lg:text-lg min-[2400px]:min-h-20! min-[2400px]:rounded-2xl! min-[2400px]:border-4! min-[2400px]:px-5! min-[2400px]:py-4! min-[2400px]:text-2xl!;
+    @apply mt-1 block w-full rounded-xl border-2 border-rose-200 bg-white text-foreground shadow-sm outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-200;
+    min-height: clamp(3rem, 2.6rem + 1vw, 5rem);
+    padding-inline: clamp(0.75rem, 0.6rem + 0.5vw, 1.25rem);
+    padding-block: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);
+    font-size: var(--text-body);
   }
 }

@@ -45,11 +45,18 @@ export default function SetupStep({ bridePhoto, onPhotoSelected, onStart }: Setu
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:py-12 lg:max-w-[1700px] lg:py-16 min-[2400px]:max-w-[2000px]! min-[2400px]:py-20!">
-      <div className="game-card p-6 sm:p-10 lg:grid lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16 lg:p-16 min-[2400px]:p-20! min-[2400px]:gap-20!">
-        <div className="flex flex-col items-center gap-4 lg:order-2 lg:gap-8 min-[2400px]:gap-8!">
+    <div className="mx-auto w-[94vw] max-w-[125rem] py-[clamp(1.5rem,1rem+2vw,5rem)]">
+      <div
+        className="game-card lg:grid lg:grid-cols-[1fr_1fr] lg:items-center"
+        style={{ padding: "var(--space-card-padding)", gap: "var(--space-gap)" }}
+      >
+        <div
+          className="flex flex-col items-center lg:order-2"
+          style={{ gap: "var(--space-gap-sm)" }}
+        >
           <div
-            className="flex h-56 w-56 items-center justify-center overflow-hidden rounded-3xl border-4 border-dashed border-rose-200 bg-rose-50 sm:h-64 sm:w-64 lg:aspect-square lg:h-[62vh] lg:w-auto lg:rounded-[2.5rem] lg:border-8 min-[2400px]:h-[65vh]! min-[2400px]:rounded-[2.5rem]! min-[2400px]:border-8!"
+            className="flex aspect-square h-[clamp(14rem,55vh,42rem)] w-auto max-w-full items-center justify-center overflow-hidden border-dashed border-rose-200 bg-rose-50"
+            style={{ borderWidth: "clamp(0.25rem, 0.2rem + 0.2vw, 0.5rem)", borderRadius: "clamp(1.5rem, 1.2rem + 1vw, 2.5rem)" }}
             onClick={() => inputRef.current?.click()}
             role="button"
             tabIndex={0}
@@ -61,7 +68,7 @@ export default function SetupStep({ bridePhoto, onPhotoSelected, onStart }: Setu
               // eslint-disable-next-line @next/next/no-img-element
               <img src={bridePhoto} alt="新娘照片預覽 / Braut-Fotovorschau" className="h-full w-full object-cover" />
             ) : (
-              <span className="px-4 text-center text-sm text-rose-400 lg:text-2xl min-[2400px]:text-3xl!">
+              <span className="px-4 text-center text-rose-400" style={{ fontSize: "var(--text-body)" }}>
                 點擊上傳照片
                 <br />
                 Foto hochladen
@@ -90,36 +97,52 @@ export default function SetupStep({ bridePhoto, onPhotoSelected, onStart }: Setu
                 : "上傳新娘照片 / Foto hochladen"}
           </button>
 
-          {error && <p className="text-sm font-semibold text-rose-600 min-[2400px]:text-2xl!">{error}</p>}
+          {error && (
+            <p className="font-semibold text-rose-600" style={{ fontSize: "var(--text-body)" }}>
+              {error}
+            </p>
+          )}
         </div>
 
-        <div className="mt-8 lg:order-1 lg:mt-0">
-          <h1 className="text-center text-2xl font-black text-rose-600 sm:text-3xl lg:text-left lg:text-6xl min-[2400px]:text-8xl!">
+        <div className="lg:order-1">
+          <h1
+            className="text-center font-black text-rose-600 lg:text-left"
+            style={{ fontSize: "var(--text-hero)" }}
+          >
             AI 新娘捏臉挑戰
-            <span className="mt-1 block text-lg font-bold text-rose-400 sm:text-xl lg:mt-3 lg:text-3xl min-[2400px]:mt-4! min-[2400px]:text-5xl!">
+            <span
+              className="mt-[0.4em] block font-bold text-rose-400"
+              style={{ fontSize: "var(--text-subtitle)" }}
+            >
               KI-Brautportrait Challenge
             </span>
           </h1>
 
-          <p className="mt-4 text-center text-sm text-foreground/70 sm:text-base lg:mt-6 lg:text-left lg:text-xl min-[2400px]:mt-8! min-[2400px]:text-3xl!">
+          <p
+            className="mt-[1em] text-center text-foreground/70 lg:text-left"
+            style={{ fontSize: "var(--text-body)" }}
+          >
             遊戲主持人請先上傳新娘的照片。 / Der Spielleiter lädt zuerst ein Foto der Braut hoch.
           </p>
 
-          <div className="mt-8 rounded-2xl bg-gold-300/25 p-4 text-sm text-[#6b4d10] sm:text-base lg:mt-10 lg:rounded-3xl lg:p-6 lg:text-lg min-[2400px]:mt-12! min-[2400px]:rounded-3xl! min-[2400px]:p-8! min-[2400px]:text-2xl!">
+          <div
+            className="mt-[1.5em] rounded-2xl bg-gold-300/25 text-[#6b4d10]"
+            style={{ padding: "clamp(1rem,0.8rem+1vw,2.5rem)", fontSize: "var(--text-body)" }}
+          >
             <p>⚠️ 新娘照片只用於現場揭曉，不會送給 AI。</p>
-            <p className="mt-1 min-[2400px]:mt-2!">
+            <p className="mt-[0.3em]">
               Das Foto der Braut wird nur für die spätere Enthüllung verwendet und nicht an die KI gesendet.
             </p>
-            <p className="mt-3 text-xs sm:text-sm lg:text-base min-[2400px]:mt-6! min-[2400px]:text-xl!">
+            <p className="mt-[1em]" style={{ fontSize: "var(--text-small)" }}>
               照片只會儲存在目前這台裝置的瀏覽器中，不會同步到其他手機或電腦。請全程使用同一台裝置。
             </p>
-            <p className="text-xs sm:text-sm lg:text-base min-[2400px]:text-xl!">
+            <p style={{ fontSize: "var(--text-small)" }}>
               Das Foto wird nur lokal im Browser dieses Geräts gespeichert und nicht mit anderen Geräten
               synchronisiert. Bitte das gleiche Gerät während des gesamten Spiels verwenden.
             </p>
           </div>
 
-          <div className="mt-8 flex justify-center lg:mt-10 lg:justify-start min-[2400px]:mt-12!">
+          <div className="mt-[1.5em] flex justify-center lg:justify-start">
             <button type="button" className="btn-primary w-full sm:w-auto" disabled={!bridePhoto} onClick={onStart}>
               開始挑戰 / Herausforderung starten
             </button>
