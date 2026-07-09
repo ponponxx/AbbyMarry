@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { resizeToSquare } from "@/lib/image";
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -12,9 +13,10 @@ type SetupStepProps = {
 
 export default function SetupStep({ bridePhoto, onPhotoSelected, onStart }: SetupStepProps) {
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function handleFile(file: File | undefined) {
+  async function handleFile(file: File | undefined) {
     setError(null);
     if (!file) return;
 
@@ -28,16 +30,18 @@ export default function SetupStep({ bridePhoto, onPhotoSelected, onStart }: Setu
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        onPhotoSelected(reader.result);
-      }
-    };
-    reader.onerror = () => {
+    setIsProcessing(true);
+    try {
+      // Fit the whole photo into a square (no cropping) so non-square uploads
+      // never lose part of the bride's face, and the same square image is
+      // used consistently everywhere it's shown.
+      const dataUrl = await resizeToSquare(file);
+      onPhotoSelected(dataUrl);
+    } catch {
       setError("讀取圖片失敗，請再試一次。 / Das Bild konnte nicht gelesen werden, bitte erneut versuchen.");
-    };
-    reader.readAsDataURL(file);
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   return (
@@ -70,11 +74,20 @@ export default function SetupStep({ bridePhoto, onPhotoSelected, onStart }: Setu
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) => handleFile(e.target.files?.[0])}
+            onChange={(e) => void handleFile(e.target.files?.[0])}
           />
 
-          <button type="button" className="btn-secondary" onClick={() => inputRef.current?.click()}>
-            {bridePhoto ? "重新選擇照片 / Foto ändern" : "上傳新娘照片 / Foto hochladen"}
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => inputRef.current?.click()}
+            disabled={isProcessing}
+          >
+            {isProcessing
+              ? "處理中… / Wird verarbeitet…"
+              : bridePhoto
+                ? "重新選擇照片 / Foto ändern"
+                : "上傳新娘照片 / Foto hochladen"}
           </button>
 
           {error && <p className="text-sm font-semibold text-rose-600 min-[2400px]:text-2xl!">{error}</p>}
