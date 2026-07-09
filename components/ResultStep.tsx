@@ -9,6 +9,7 @@ type ResultStepProps = {
   prompt: string;
   bridePhoto: string | null;
   generationError?: string | null;
+  isGenerating: boolean;
   onPlayAgain: () => void;
   onBackToSetup: () => void;
 };
@@ -50,6 +51,7 @@ export default function ResultStep({
   prompt,
   bridePhoto,
   generationError,
+  isGenerating,
   onPlayAgain,
   onBackToSetup,
 }: ResultStepProps) {
@@ -59,6 +61,7 @@ export default function ResultStep({
 
   const total = SCORE_ITEMS.reduce((sum, item) => sum + scores[item.key], 0);
   const summary = resultText(total);
+  const hasFailed = !isGenerating && !generatedImageDataUrl;
 
   async function handleCopyPrompt() {
     try {
@@ -78,13 +81,30 @@ export default function ResultStep({
         </h2>
 
         {generatedImageDataUrl ? (
-          <div className="mx-auto mt-6 max-w-sm overflow-hidden rounded-3xl shadow-lg ring-4 ring-rose-200 min-[2400px]:mt-14! min-[2400px]:max-w-2xl! min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-8!">
+          <div className="relative mx-auto mt-6 max-w-sm overflow-hidden rounded-3xl shadow-lg ring-4 ring-rose-200 min-[2400px]:mt-14! min-[2400px]:max-w-2xl! min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-8!">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={generatedImageDataUrl}
               alt="AI 生成的新娘 / KI-generierte Braut"
               className="w-full object-cover"
             />
+            {isGenerating && (
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-center text-xs font-semibold text-white min-[2400px]:px-8! min-[2400px]:py-6! min-[2400px]:text-2xl!">
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2 w-2 animate-ping rounded-full bg-gold-300 min-[2400px]:h-4! min-[2400px]:w-4!" />
+                  AI 正在畫新娘…… / Die KI zeichnet gerade die Braut ……
+                </span>
+              </div>
+            )}
+          </div>
+        ) : isGenerating ? (
+          <div className="mx-auto mt-6 flex max-w-sm flex-col items-center justify-center gap-4 rounded-3xl bg-rose-50 p-10 text-center ring-4 ring-rose-100 min-[2400px]:mt-14! min-[2400px]:max-w-2xl! min-[2400px]:rounded-[2.5rem]! min-[2400px]:gap-8! min-[2400px]:p-20! min-[2400px]:ring-8!">
+            <span className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500 min-[2400px]:h-20! min-[2400px]:w-20! min-[2400px]:border-8!" />
+            <p className="text-sm font-semibold text-rose-500 sm:text-base min-[2400px]:text-3xl!">
+              AI 正在努力理解新郎心中的新娘……
+              <br />
+              Die KI versucht gerade, die Braut aus dem Herzen des Bräutigams zu zeichnen …
+            </p>
           </div>
         ) : (
           <div className="mt-6 rounded-2xl bg-rose-50 p-5 text-sm text-foreground/80 sm:text-base min-[2400px]:mt-14! min-[2400px]:rounded-3xl! min-[2400px]:p-10! min-[2400px]:text-2xl!">
@@ -105,13 +125,15 @@ export default function ResultStep({
           </div>
         )}
 
-        {!revealed ? (
+        {!isGenerating && !hasFailed && !revealed && (
           <div className="mt-6 flex justify-center min-[2400px]:mt-14!">
             <button type="button" className="btn-gold" onClick={() => setRevealed(true)} disabled={!bridePhoto}>
               揭曉新娘照片 / Brautfoto enthüllen
             </button>
           </div>
-        ) : (
+        )}
+
+        {!isGenerating && revealed && (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 min-[2400px]:mt-14! min-[2400px]:gap-12!">
             <div className="text-center">
               <p className="field-label mb-2 min-[2400px]:mb-4!">AI 生成的新娘 / KI-generierte Braut</p>

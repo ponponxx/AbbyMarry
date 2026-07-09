@@ -16,9 +16,12 @@ import {
   setGeneratedImage as persistGeneratedImage,
   clearRoundResult,
 } from "@/lib/storage";
-import type { BrideFormValues, GenerateImageErrorResponse, GenerateImageResponse } from "@/lib/types";
+import type { BrideFormValues, GenerateImageStreamEvent } from "@/lib/types";
 
 type Step = "setup" | "memorize" | "form" | "result";
+
+const FALLBACK_ERROR =
+  "無法連線到 AI 服務，請檢查網路連線。 / Verbindung zum KI-Dienst fehlgeschlagen, bitte Internetverbindung prüfen.";
 
 export default function GameShell() {
   const [hydrated, setHydrated] = useState(false);
@@ -28,7 +31,7 @@ export default function GameShell() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string>("");
   const [generationError, setGenerationError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Reading localStorage must happen client-side only (post-mount) so the server-rendered
   // markup and the first client render stay in sync; the `hydrated` gate below hides the
@@ -52,11 +55,15 @@ export default function GameShell() {
   }
 
   async function handleSubmit(values: BrideFormValues) {
-    setIsSubmitting(true);
-    setGenerationError(null);
-
     const prompt = buildBridePrompt(values);
+
+    setIsGenerating(true);
+    setGenerationError(null);
+    setGeneratedImage(null);
     setGeneratedPrompt(prompt);
+    // Jump to the reveal card immediately so the groom (and the room, if this is
+    // projected) watches the portrait get drawn live instead of staring at a form.
+    setStep("result");
 
     try {
       const res = await fetch("/api/generate-image", {
@@ -65,30 +72,42 @@ export default function GameShell() {
         body: JSON.stringify({ prompt }),
       });
 
-      if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as GenerateImageErrorResponse | null;
-        setGenerationError(
-          data?.error ??
-            "AI 圖片生成失敗，請稍後再試。 / Die KI-Bildgenerierung ist fehlgeschlagen, bitte später erneut versuchen."
-        );
-        setGeneratedImage(null);
-        setStep("result");
+      if (!res.body) {
+        setGenerationError(FALLBACK_ERROR);
         return;
       }
 
-      const data = (await res.json()) as GenerateImageResponse;
-      const dataUrl = `data:${data.mimeType};base64,${data.imageBase64}`;
-      setGeneratedImage(dataUrl);
-      persistGeneratedImage(dataUrl);
-      setStep("result");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const event = JSON.parse(line) as GenerateImageStreamEvent;
+
+          if (event.type === "partial" || event.type === "completed") {
+            const dataUrl = `data:${event.mimeType};base64,${event.imageBase64}`;
+            setGeneratedImage(dataUrl);
+            if (event.type === "completed") {
+              persistGeneratedImage(dataUrl);
+            }
+          } else if (event.type === "error") {
+            setGenerationError(event.error);
+          }
+        }
+      }
     } catch {
-      setGenerationError(
-        "無法連線到 AI 服務，請檢查網路連線。 / Verbindung zum KI-Dienst fehlgeschlagen, bitte Internetverbindung prüfen."
-      );
-      setGeneratedImage(null);
-      setStep("result");
+      setGenerationError(FALLBACK_ERROR);
     } finally {
-      setIsSubmitting(false);
+      setIsGenerating(false);
     }
   }
 
@@ -127,8 +146,7 @@ export default function GameShell() {
           initialValues={formValues}
           onValuesChange={handleValuesChange}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          submitError={generationError}
+          isSubmitting={isGenerating}
         />
       )}
 
@@ -138,6 +156,7 @@ export default function GameShell() {
           prompt={generatedPrompt}
           bridePhoto={bridePhoto}
           generationError={generationError}
+          isGenerating={isGenerating}
           onPlayAgain={handlePlayAgain}
           onBackToSetup={handleBackToSetup}
         />

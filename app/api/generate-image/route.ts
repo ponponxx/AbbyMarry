@@ -6,10 +6,16 @@ export const dynamic = "force-dynamic";
 
 const MIN_PROMPT_LENGTH = 50;
 const MAX_PROMPT_LENGTH = 2000;
+const MAX_PARTIAL_IMAGES = 3;
 
 type GenerateImageRequestBody = {
   prompt?: unknown;
 };
+
+type StreamEvent =
+  | { type: "partial"; imageBase64: string; mimeType: "image/png"; index: number }
+  | { type: "completed"; imageBase64: string; mimeType: "image/png"; prompt: string }
+  | { type: "error"; error: string };
 
 function errorResponse(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
@@ -20,6 +26,39 @@ function qualityForModel(model: string): "low" | "medium" | "high" | "auto" | "s
   if (model === "dall-e-3") return "standard";
   // dall-e-2 only supports "standard", which is also its only quality value.
   return undefined;
+}
+
+function messageForOpenAIError(err: unknown): { message: string; status: number } {
+  if (err instanceof OpenAI.APIError) {
+    if (err.status === 401 || err.status === 403) {
+      return {
+        message: "OpenAI API Key 無效或沒有權限。 / Der OpenAI API Key ist ungültig oder hat keine Berechtigung.",
+        status: err.status,
+      };
+    }
+    if (err.status === 429) {
+      return {
+        message: "AI 目前請求過多，請稍後再試。 / Zu viele Anfragen an die KI, bitte später erneut versuchen.",
+        status: 429,
+      };
+    }
+    if (err.status === 400 && /moderation|safety|policy/i.test(err.message ?? "")) {
+      return {
+        message:
+          "這個描述被 AI 安全系統擋下了，請調整描述後再試一次。 / Diese Beschreibung wurde vom KI-Sicherheitssystem blockiert, bitte die Beschreibung anpassen und erneut versuchen.",
+        status: 400,
+      };
+    }
+    return {
+      message: `AI 圖片生成失敗：${err.message} / KI-Bildgenerierung fehlgeschlagen: ${err.message}`,
+      status: err.status ?? 500,
+    };
+  }
+
+  return {
+    message: "發生未知錯誤，請稍後再試。 / Ein unbekannter Fehler ist aufgetreten, bitte später erneut versuchen.",
+    status: 500,
+  };
 }
 
 export async function POST(request: Request) {
@@ -36,10 +75,7 @@ export async function POST(request: Request) {
     ["image", "images", "photo", "file", "imageBase64", "imageUrl"].includes(key)
   );
   if (hasImageField) {
-    return errorResponse(
-      "此 API 不接受圖片輸入。 / Diese API akzeptiert keine Bilddaten.",
-      400
-    );
+    return errorResponse("此 API 不接受圖片輸入。 / Diese API akzeptiert keine Bilddaten.", 400);
   }
 
   const { prompt } = body;
@@ -71,88 +107,90 @@ export async function POST(request: Request) {
 
   const model = process.env.IMAGE_MODEL || "gpt-image-2";
   const client = new OpenAI({ apiKey });
+  const supportsStreaming = model.startsWith("gpt-image");
+  const quality = qualityForModel(model);
+  const isDalle = model.startsWith("dall-e");
 
-  try {
-    const quality = qualityForModel(model);
-    const isDalle = model.startsWith("dall-e");
+  const encoder = new TextEncoder();
 
-    const result = await client.images.generate({
-      model,
-      prompt: trimmedPrompt,
-      n: 1,
-      size: "1024x1024",
-      ...(quality ? { quality } : {}),
-      ...(isDalle ? { response_format: "b64_json" as const } : {}),
-    });
-
-    const image = result.data?.[0];
-
-    if (!image) {
-      return errorResponse(
-        "AI 沒有回傳圖片，請再試一次。 / Die KI hat kein Bild zurückgegeben, bitte erneut versuchen.",
-        502
-      );
-    }
-
-    let imageBase64 = image.b64_json;
-
-    if (!imageBase64 && image.url) {
-      const imageRes = await fetch(image.url);
-      if (!imageRes.ok) {
-        return errorResponse(
-          "無法下載生成的圖片。 / Das generierte Bild konnte nicht heruntergeladen werden.",
-          502
-        );
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      function send(event: StreamEvent) {
+        controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
       }
-      const buffer = await imageRes.arrayBuffer();
-      imageBase64 = Buffer.from(buffer).toString("base64");
-    }
 
-    if (!imageBase64) {
-      return errorResponse(
-        "AI 沒有回傳可用的圖片資料。 / Die KI hat keine verwendbaren Bilddaten zurückgegeben.",
-        502
-      );
-    }
+      try {
+        if (supportsStreaming) {
+          const events = await client.images.generate({
+            model,
+            prompt: trimmedPrompt,
+            n: 1,
+            size: "1024x1024",
+            ...(quality ? { quality } : {}),
+            stream: true,
+            partial_images: MAX_PARTIAL_IMAGES,
+          });
 
-    return NextResponse.json({
-      imageBase64,
-      mimeType: "image/png",
-      prompt: trimmedPrompt,
-    });
-  } catch (err: unknown) {
-    return handleOpenAIError(err);
-  }
-}
+          for await (const event of events) {
+            if (event.type === "image_generation.partial_image") {
+              send({
+                type: "partial",
+                imageBase64: event.b64_json,
+                mimeType: "image/png",
+                index: event.partial_image_index,
+              });
+            } else if (event.type === "image_generation.completed") {
+              send({
+                type: "completed",
+                imageBase64: event.b64_json,
+                mimeType: "image/png",
+                prompt: trimmedPrompt,
+              });
+            }
+          }
+        } else {
+          const result = await client.images.generate({
+            model,
+            prompt: trimmedPrompt,
+            n: 1,
+            size: "1024x1024",
+            ...(quality ? { quality } : {}),
+            ...(isDalle ? { response_format: "b64_json" as const } : {}),
+          });
 
-function handleOpenAIError(err: unknown) {
-  if (err instanceof OpenAI.APIError) {
-    if (err.status === 401 || err.status === 403) {
-      return errorResponse(
-        "OpenAI API Key 無效或沒有權限。 / Der OpenAI API Key ist ungültig oder hat keine Berechtigung.",
-        err.status
-      );
-    }
-    if (err.status === 429) {
-      return errorResponse(
-        "AI 目前請求過多，請稍後再試。 / Zu viele Anfragen an die KI, bitte später erneut versuchen.",
-        429
-      );
-    }
-    if (err.status === 400 && /moderation|safety|policy/i.test(err.message ?? "")) {
-      return errorResponse(
-        "這個描述被 AI 安全系統擋下了，請調整描述後再試一次。 / Diese Beschreibung wurde vom KI-Sicherheitssystem blockiert, bitte die Beschreibung anpassen und erneut versuchen.",
-        400
-      );
-    }
-    return errorResponse(
-      `AI 圖片生成失敗：${err.message} / KI-Bildgenerierung fehlgeschlagen: ${err.message}`,
-      err.status ?? 500
-    );
-  }
+          const image = result.data?.[0];
+          let imageBase64 = image?.b64_json;
 
-  return errorResponse(
-    "發生未知錯誤，請稍後再試。 / Ein unbekannter Fehler ist aufgetreten, bitte später erneut versuchen.",
-    500
-  );
+          if (!imageBase64 && image?.url) {
+            const imageRes = await fetch(image.url);
+            if (imageRes.ok) {
+              const buffer = await imageRes.arrayBuffer();
+              imageBase64 = Buffer.from(buffer).toString("base64");
+            }
+          }
+
+          if (!imageBase64) {
+            send({
+              type: "error",
+              error: "AI 沒有回傳可用的圖片資料。 / Die KI hat keine verwendbaren Bilddaten zurückgegeben.",
+            });
+          } else {
+            send({ type: "completed", imageBase64, mimeType: "image/png", prompt: trimmedPrompt });
+          }
+        }
+      } catch (err) {
+        const { message } = messageForOpenAIError(err);
+        send({ type: "error", error: message });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+    },
+  });
 }

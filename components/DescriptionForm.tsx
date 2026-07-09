@@ -11,7 +11,6 @@ type DescriptionFormProps = {
   onValuesChange: (values: BrideFormValues) => void;
   onSubmit: (values: BrideFormValues) => void;
   isSubmitting: boolean;
-  submitError?: string | null;
 };
 
 export default function DescriptionForm({
@@ -19,7 +18,6 @@ export default function DescriptionForm({
   onValuesChange,
   onSubmit,
   isSubmitting,
-  submitError,
 }: DescriptionFormProps) {
   const [values, setValues] = useState<BrideFormValues>(initialValues);
 
@@ -90,20 +88,6 @@ export default function DescriptionForm({
               {previewPrompt}
             </p>
           </details>
-
-          {submitError && (
-            <p className="rounded-xl bg-rose-100 p-3 text-sm font-semibold text-rose-700 min-[2400px]:rounded-2xl! min-[2400px]:p-6! min-[2400px]:text-2xl!">
-              {submitError}
-            </p>
-          )}
-
-          {isSubmitting && (
-            <p className="text-center text-sm font-semibold text-rose-500 sm:text-base min-[2400px]:text-3xl!">
-              AI 正在努力理解新郎心中的新娘……
-              <br />
-              Die KI versucht gerade, die Braut aus dem Herzen des Bräutigams zu zeichnen …
-            </p>
-          )}
 
           <div className="flex flex-col justify-center gap-3 min-[2400px]:gap-8!">
             <button type="submit" className="btn-primary" disabled={isSubmitting}>

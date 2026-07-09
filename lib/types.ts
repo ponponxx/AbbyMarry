@@ -39,6 +39,16 @@ export type GenerateImageErrorResponse = {
   error: string;
 };
 
+/**
+ * NDJSON events streamed by POST /api/generate-image: one JSON object per
+ * line, so the client can paint each partial frame as the portrait is drawn
+ * instead of waiting silently for a single final image.
+ */
+export type GenerateImageStreamEvent =
+  | { type: "partial"; imageBase64: string; mimeType: "image/png"; index: number }
+  | { type: "completed"; imageBase64: string; mimeType: "image/png"; prompt: string }
+  | { type: "error"; error: string };
+
 export type ScoreCategory = "hair" | "faceShape" | "eyes" | "expression" | "overall";
 
 export type ScoreValues = Record<ScoreCategory, number>;
