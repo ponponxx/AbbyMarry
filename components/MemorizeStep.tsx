@@ -51,30 +51,30 @@ export default function MemorizeStep({ bridePhoto, onDone }: MemorizeStepProps) 
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col items-center px-4 py-8 sm:py-12 lg:max-w-6xl min-[2400px]:max-w-[1700px]! min-[2400px]:py-20!">
-      <div className="game-card w-full p-6 text-center sm:p-10 lg:grid lg:grid-cols-[1.3fr_1fr] lg:items-center lg:gap-12 lg:text-left min-[2400px]:p-20! min-[2400px]:gap-20!">
-        <div className="mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-3xl shadow-lg ring-4 ring-rose-200 lg:mx-0 lg:h-[70vh] lg:w-auto lg:max-w-none min-[2400px]:h-[72vh]! min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-8!">
+    <div className="mx-auto flex w-full max-w-2xl flex-col items-center px-4 py-8 sm:py-12 lg:max-w-[1700px] lg:py-16 min-[2400px]:max-w-[2000px]! min-[2400px]:py-20!">
+      <div className="game-card w-full p-6 text-center sm:p-10 lg:grid lg:grid-cols-[1.3fr_1fr] lg:items-center lg:gap-16 lg:p-16 lg:text-left min-[2400px]:p-20! min-[2400px]:gap-20!">
+        <div className="mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-3xl shadow-lg ring-4 ring-rose-200 lg:mx-0 lg:h-[75vh] lg:w-auto lg:max-w-none lg:rounded-[2.5rem] lg:ring-8 min-[2400px]:h-[78vh]! min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-8!">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={bridePhoto} alt="新娘照片 / Brautfoto" className="h-full w-full object-cover" />
         </div>
 
         <div className="mt-6 lg:mt-0">
-          <p className="text-base font-semibold text-rose-600 sm:text-lg min-[2400px]:text-4xl!">
+          <p className="text-base font-semibold text-rose-600 sm:text-lg lg:text-3xl min-[2400px]:text-4xl!">
             新郎請仔細看，等一下只能靠記憶描述新娘。
           </p>
-          <p className="mt-1 text-sm text-foreground/70 sm:text-base min-[2400px]:mt-4! min-[2400px]:text-2xl!">
+          <p className="mt-1 text-sm text-foreground/70 sm:text-base lg:mt-4 lg:text-xl min-[2400px]:mt-4! min-[2400px]:text-2xl!">
             Bräutigam, schau genau hin. Danach darfst du sie nur aus dem Gedächtnis beschreiben.
           </p>
 
           <div
-            className={`mx-auto mt-6 flex h-24 w-24 items-center justify-center rounded-full border-4 text-3xl font-black sm:h-28 sm:w-28 sm:text-4xl lg:mx-0 min-[2400px]:mt-12! min-[2400px]:h-56! min-[2400px]:w-56! min-[2400px]:border-8! min-[2400px]:text-9xl! ${
+            className={`mx-auto mt-6 flex h-24 w-24 items-center justify-center rounded-full border-4 text-3xl font-black sm:h-28 sm:w-28 sm:text-4xl lg:mx-0 lg:mt-10 lg:h-40 lg:w-40 lg:border-8 lg:text-6xl min-[2400px]:mt-12! min-[2400px]:h-56! min-[2400px]:w-56! min-[2400px]:border-8! min-[2400px]:text-9xl! ${
               isRunning ? "border-rose-400 text-rose-500" : "border-rose-200 text-rose-300"
             }`}
           >
             {secondsLeft}
           </div>
 
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start min-[2400px]:mt-12! min-[2400px]:gap-6!">
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row lg:mt-10 lg:justify-start lg:gap-6 min-[2400px]:mt-12! min-[2400px]:gap-6!">
             <button type="button" className="btn-primary" onClick={handleStart} disabled={isRunning}>
               開始倒數 / Countdown starten
             </button>

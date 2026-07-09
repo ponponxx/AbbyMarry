@@ -42,16 +42,16 @@ export default function DescriptionForm({
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12 lg:max-w-7xl min-[2400px]:max-w-[1800px]! min-[2400px]:py-20!">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12 lg:max-w-[1900px] lg:py-16 min-[2400px]:max-w-[2100px]! min-[2400px]:py-20!">
       <form
         onSubmit={handleSubmit}
-        className="game-card p-6 sm:p-10 lg:grid lg:grid-cols-[1fr_340px] lg:items-start lg:gap-10 xl:grid-cols-[1fr_400px] min-[2400px]:p-20! min-[2400px]:gap-16!"
+        className="game-card p-6 sm:p-10 lg:grid lg:grid-cols-[1fr_420px] lg:items-start lg:gap-14 lg:p-16 xl:grid-cols-[1fr_460px] min-[2400px]:p-20! min-[2400px]:gap-16!"
       >
-        <h2 className="text-center text-xl font-black text-rose-600 sm:text-2xl lg:col-span-2 lg:text-left min-[2400px]:text-7xl!">
+        <h2 className="text-center text-xl font-black text-rose-600 sm:text-2xl lg:col-span-2 lg:text-left lg:text-4xl min-[2400px]:text-7xl!">
           描述新娘 / Beschreibe die Braut
         </h2>
 
-        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:mt-8 lg:grid-cols-3 min-[2400px]:mt-14! min-[2400px]:grid-cols-4! min-[2400px]:gap-10!">
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:mt-10 lg:grid-cols-3 lg:gap-7 min-[2400px]:mt-14! min-[2400px]:grid-cols-4! min-[2400px]:gap-10!">
           {FIELD_CONFIGS.map((field) => (
             <BilingualSelect
               key={field.key}
@@ -62,26 +62,26 @@ export default function DescriptionForm({
           ))}
         </div>
 
-        <div className="mt-6 flex flex-col gap-6 lg:mt-8 lg:gap-8 lg:self-start min-[2400px]:mt-14! min-[2400px]:gap-14!">
+        <div className="mt-6 flex flex-col gap-6 lg:mt-10 lg:gap-8 lg:self-start min-[2400px]:mt-14! min-[2400px]:gap-14!">
           <div>
             <label htmlFor="extra" className="field-label">
               {EXTRA_FIELD.labelZh} / {EXTRA_FIELD.labelDe}
             </label>
             <textarea
               id="extra"
-              className="field-select mt-1 min-h-24 resize-none lg:min-h-32 min-[2400px]:min-h-40!"
+              className="field-select mt-1 min-h-24 resize-none lg:min-h-40 min-[2400px]:min-h-40!"
               maxLength={EXTRA_FIELD.maxLength}
               value={values.extra}
               placeholder={`${EXTRA_FIELD.placeholderZh}\n${EXTRA_FIELD.placeholderDe}`}
               onChange={(e) => updateField("extra", e.target.value.slice(0, EXTRA_FIELD.maxLength))}
             />
-            <p className="mt-1 text-right text-xs text-foreground/50 min-[2400px]:text-xl!">
+            <p className="mt-1 text-right text-xs text-foreground/50 lg:text-base min-[2400px]:text-xl!">
               {values.extra.length} / {EXTRA_FIELD.maxLength}
             </p>
           </div>
 
-          <details className="rounded-2xl bg-rose-50 p-4 text-sm min-[2400px]:rounded-3xl! min-[2400px]:p-8! min-[2400px]:text-xl!">
-            <summary className="cursor-pointer font-semibold text-rose-600 min-[2400px]:text-2xl!">
+          <details className="rounded-2xl bg-rose-50 p-4 text-sm lg:rounded-3xl lg:p-6 lg:text-base min-[2400px]:rounded-3xl! min-[2400px]:p-8! min-[2400px]:text-xl!">
+            <summary className="cursor-pointer font-semibold text-rose-600 lg:text-xl min-[2400px]:text-2xl!">
               AI Prompt / KI-Prompt
             </summary>
             <p className="mt-3 whitespace-pre-wrap break-words text-foreground/70 min-[2400px]:mt-4!">

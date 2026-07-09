@@ -119,9 +119,9 @@ export default function ResultStep({
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12 lg:max-w-6xl min-[2400px]:max-w-[1800px]! min-[2400px]:py-20!">
-      <div className="game-card p-6 sm:p-10 min-[2400px]:p-20!">
-        <h2 className="text-center text-xl font-black text-rose-600 sm:text-2xl min-[2400px]:text-7xl!">
+    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12 lg:max-w-[1700px] lg:py-16 min-[2400px]:max-w-[2000px]! min-[2400px]:py-20!">
+      <div className="game-card p-6 sm:p-10 lg:p-14 min-[2400px]:p-20!">
+        <h2 className="text-center text-xl font-black text-rose-600 sm:text-2xl lg:text-4xl min-[2400px]:text-7xl!">
           結果揭曉 / Ergebnis
         </h2>
 
@@ -149,10 +149,10 @@ export default function ResultStep({
         )}
 
         {!hasFailed && (
-          <div className="relative mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 min-[2400px]:mt-14! min-[2400px]:gap-12!">
+          <div className="relative mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:mt-10 lg:gap-10 min-[2400px]:mt-14! min-[2400px]:gap-12!">
             <div className="text-center">
-              <p className="field-label mb-2 min-[2400px]:mb-4!">AI 生成的新娘 / KI-generierte Braut</p>
-              <div className="relative aspect-square overflow-hidden rounded-2xl ring-4 ring-rose-200 lg:h-[42vh] lg:w-auto min-[2400px]:h-[44vh]! min-[2400px]:rounded-3xl! min-[2400px]:ring-8!">
+              <p className="field-label mb-2 lg:mb-4 min-[2400px]:mb-4!">AI 生成的新娘 / KI-generierte Braut</p>
+              <div className="relative aspect-square overflow-hidden rounded-2xl ring-4 ring-rose-200 lg:h-[58vh] lg:w-auto lg:rounded-3xl lg:ring-8 min-[2400px]:h-[62vh]! min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-8!">
                 {generatedImageDataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -162,11 +162,11 @@ export default function ResultStep({
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center bg-rose-50">
-                    <span className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500 min-[2400px]:h-20! min-[2400px]:w-20! min-[2400px]:border-8!" />
+                    <span className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500 lg:h-16 lg:w-16 lg:border-8 min-[2400px]:h-20! min-[2400px]:w-20! min-[2400px]:border-8!" />
                   </div>
                 )}
                 {isGenerating && (
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-center text-xs font-semibold text-white min-[2400px]:px-8! min-[2400px]:py-6! min-[2400px]:text-2xl!">
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-center text-xs font-semibold text-white lg:px-6 lg:py-4 lg:text-lg min-[2400px]:px-8! min-[2400px]:py-6! min-[2400px]:text-2xl!">
                     <span className="inline-flex items-center gap-2">
                       <span className="h-2 w-2 animate-ping rounded-full bg-gold-300 min-[2400px]:h-4! min-[2400px]:w-4!" />
                       AI 正在畫新娘…… / Die KI zeichnet gerade die Braut ……
@@ -176,8 +176,8 @@ export default function ResultStep({
               </div>
             </div>
             <div className="text-center">
-              <p className="field-label mb-2 min-[2400px]:mb-4!">真正的新娘 / Die echte Braut</p>
-              <div className="aspect-square overflow-hidden rounded-2xl ring-4 ring-gold-400 lg:h-[42vh] lg:w-auto min-[2400px]:h-[44vh]! min-[2400px]:rounded-3xl! min-[2400px]:ring-8!">
+              <p className="field-label mb-2 lg:mb-4 min-[2400px]:mb-4!">真正的新娘 / Die echte Braut</p>
+              <div className="aspect-square overflow-hidden rounded-2xl ring-4 ring-gold-400 lg:h-[58vh] lg:w-auto lg:rounded-3xl lg:ring-8 min-[2400px]:h-[62vh]! min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-8!">
                 {bridePhoto && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={bridePhoto} alt="真正的新娘" className="h-full w-full object-cover" />
@@ -188,14 +188,14 @@ export default function ResultStep({
         )}
 
         {isReady && (
-          <div className="mt-10 min-[2400px]:mt-20!">
-            <h3 className="text-center text-lg font-black text-rose-600 sm:text-xl min-[2400px]:text-5xl!">
+          <div className="mt-10 lg:mt-16 min-[2400px]:mt-20!">
+            <h3 className="text-center text-lg font-black text-rose-600 sm:text-xl lg:text-3xl min-[2400px]:text-5xl!">
               新郎記憶力評分 / Gedächtniswertung des Bräutigams
             </h3>
-            <p className="mt-1 text-center text-xs text-foreground/60 sm:text-sm min-[2400px]:text-xl!">
+            <p className="mt-1 text-center text-xs text-foreground/60 sm:text-sm lg:text-base min-[2400px]:text-xl!">
               開始評分後會自動合成新娘照片 / Die Zusammenführung startet automatisch, sobald du zu bewerten beginnst
             </p>
-            <div className="mx-auto mt-4 flex max-w-xl flex-col gap-4 min-[2400px]:mt-10! min-[2400px]:max-w-3xl! min-[2400px]:gap-8!">
+            <div className="mx-auto mt-4 flex max-w-xl flex-col gap-4 lg:mt-8 lg:max-w-2xl lg:gap-6 min-[2400px]:mt-10! min-[2400px]:max-w-3xl! min-[2400px]:gap-8!">
               {SCORE_ITEMS.map((item) => (
                 <StarRating
                   key={item.key}
@@ -208,7 +208,7 @@ export default function ResultStep({
             </div>
 
             {isMerging && (
-              <p className="mt-6 text-center text-sm font-semibold text-rose-500 sm:text-base min-[2400px]:mt-10! min-[2400px]:text-3xl!">
+              <p className="mt-6 text-center text-sm font-semibold text-rose-500 sm:text-base lg:text-lg min-[2400px]:mt-10! min-[2400px]:text-3xl!">
                 正在分析兩張臉的特徵並融合……第一次載入模型可能要多等一下。
                 <br />
                 Die Gesichtsmerkmale werden analysiert und zusammengeführt … das erste Laden des Modells kann
@@ -217,14 +217,14 @@ export default function ResultStep({
             )}
 
             {mergeError && (
-              <p className="mt-6 rounded-xl bg-rose-100 p-3 text-center text-sm font-semibold text-rose-700 min-[2400px]:mt-10! min-[2400px]:rounded-2xl! min-[2400px]:p-6! min-[2400px]:text-2xl!">
+              <p className="mt-6 rounded-xl bg-rose-100 p-3 text-center text-sm font-semibold text-rose-700 lg:text-lg min-[2400px]:mt-10! min-[2400px]:rounded-2xl! min-[2400px]:p-6! min-[2400px]:text-2xl!">
                 {mergeError}
               </p>
             )}
           </div>
         )}
 
-        <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row min-[2400px]:mt-20! min-[2400px]:gap-8!">
+        <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row lg:mt-16 lg:gap-6 min-[2400px]:mt-20! min-[2400px]:gap-8!">
           <button type="button" className="btn-primary" onClick={onPlayAgain}>
             再玩一次 / Noch einmal spielen
           </button>
@@ -236,35 +236,35 @@ export default function ResultStep({
 
       {showResultPanel && mergedImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="game-card relative max-h-[90vh] w-full max-w-3xl overflow-y-auto p-6 sm:p-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-10 min-[2400px]:max-w-[1600px]! min-[2400px]:gap-16! min-[2400px]:p-20!">
+          <div className="game-card relative max-h-[90vh] w-full max-w-3xl overflow-y-auto p-6 sm:p-10 lg:grid lg:max-w-5xl lg:grid-cols-2 lg:items-center lg:gap-14 lg:p-16 min-[2400px]:max-w-[1800px]! min-[2400px]:gap-16! min-[2400px]:p-20!">
             <button
               type="button"
               aria-label="關閉 / Schließen"
-              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-xl font-bold text-rose-600 hover:bg-rose-200 min-[2400px]:h-16! min-[2400px]:w-16! min-[2400px]:text-4xl!"
+              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-xl font-bold text-rose-600 hover:bg-rose-200 lg:h-12 lg:w-12 lg:text-2xl min-[2400px]:h-16! min-[2400px]:w-16! min-[2400px]:text-4xl!"
               onClick={() => setShowResultPanel(false)}
             >
               ✕
             </button>
 
             <div className="text-center">
-              <p className="field-label mb-2 min-[2400px]:mb-4!">合成新娘 / Verschmolzene Braut</p>
-              <div className="mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl ring-4 ring-gold-400 min-[2400px]:rounded-3xl! min-[2400px]:ring-8!">
+              <p className="field-label mb-2 lg:mb-4 min-[2400px]:mb-4!">合成新娘 / Verschmolzene Braut</p>
+              <div className="mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl ring-4 ring-gold-400 lg:max-w-none lg:rounded-3xl lg:ring-8 min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-8!">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={mergedImage} alt="合成新娘 / Verschmolzene Braut" className="h-full w-full object-cover" />
               </div>
             </div>
 
             <div className="mt-8 text-center lg:mt-0 lg:text-left">
-              <h3 className="text-lg font-black text-rose-600 sm:text-xl min-[2400px]:text-5xl!">
+              <h3 className="text-lg font-black text-rose-600 sm:text-xl lg:text-3xl min-[2400px]:text-5xl!">
                 新郎記憶力評分 / Gedächtniswertung des Bräutigams
               </h3>
-              <p className="mt-4 text-3xl font-black text-gold-500 min-[2400px]:mt-10! min-[2400px]:text-8xl!">
+              <p className="mt-4 text-3xl font-black text-gold-500 lg:mt-8 lg:text-6xl min-[2400px]:mt-10! min-[2400px]:text-8xl!">
                 {total} / 25
               </p>
-              <p className="mt-3 text-base font-semibold text-rose-600 min-[2400px]:mt-6! min-[2400px]:text-4xl!">
+              <p className="mt-3 text-base font-semibold text-rose-600 lg:mt-6 lg:text-2xl min-[2400px]:mt-6! min-[2400px]:text-4xl!">
                 {summary.zh}
               </p>
-              <p className="mt-1 text-sm text-foreground/60 min-[2400px]:text-2xl!">{summary.de}</p>
+              <p className="mt-1 text-sm text-foreground/60 lg:text-lg min-[2400px]:text-2xl!">{summary.de}</p>
             </div>
           </div>
         </div>
