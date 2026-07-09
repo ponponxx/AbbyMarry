@@ -138,7 +138,7 @@ async function detectFacePoints(
  * halfway between the two. Throws NoFaceDetectedError if a face can't be
  * found in either photo. Returns a PNG data URL.
  */
-export async function mergeFaces(imageDataUrl1: string, imageDataUrl2: string): Promise<string> {
+async function mergeFacesInner(imageDataUrl1: string, imageDataUrl2: string): Promise<string> {
   const faceapi = await import("face-api.js");
   await loadModels();
 
@@ -203,4 +203,29 @@ export async function mergeFaces(imageDataUrl1: string, imageDataUrl2: string): 
   outCtx.globalAlpha = 1;
 
   return outCanvas.toDataURL("image/png");
+}
+
+export class MergeTimeoutError extends Error {
+  constructor() {
+    super("MERGE_TIMEOUT");
+    this.name = "MergeTimeoutError";
+  }
+}
+
+const MERGE_TIMEOUT_MS = 45_000;
+
+/**
+ * Merges the faces from two data-URL images into one new face, blended
+ * halfway between the two. Throws NoFaceDetectedError if a face can't be
+ * found in either photo, or MergeTimeoutError if the on-device face
+ * detection model takes too long (e.g. a slow/older phone) so the game
+ * never gets stuck waiting. Returns a PNG data URL.
+ */
+export async function mergeFaces(imageDataUrl1: string, imageDataUrl2: string): Promise<string> {
+  return Promise.race([
+    mergeFacesInner(imageDataUrl1, imageDataUrl2),
+    new Promise<string>((_, reject) => {
+      setTimeout(() => reject(new MergeTimeoutError()), MERGE_TIMEOUT_MS);
+    }),
+  ]);
 }
