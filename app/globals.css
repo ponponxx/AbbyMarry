@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fdf6f0;
+  --foreground: #4a2e2e;
+  --rose-50: #fff1f2;
+  --rose-100: #ffe4e8;
+  --rose-200: #fecdd6;
+  --rose-400: #fb7189;
+  --rose-500: #f43f68;
+  --rose-600: #e11d5c;
+  --gold-300: #f3d98b;
+  --gold-400: #e8c468;
+  --gold-500: #d4a437;
+  --cream: #fdf6f0;
+}
+
+/* Large-display scaling (e.g. casting/mirroring to a 3840x2160 TV for the reveal)
+   uses Tailwind's arbitrary-value breakpoint variant `min-[2400px]:` directly on
+   utilities below, rather than a named theme breakpoint, since named custom
+   breakpoints were not sorting correctly after `sm`/`md`/`lg` in this Tailwind
+   version's cascade output. */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-rose-50: var(--rose-50);
+  --color-rose-100: var(--rose-100);
+  --color-rose-200: var(--rose-200);
+  --color-rose-400: var(--rose-400);
+  --color-rose-500: var(--rose-500);
+  --color-rose-600: var(--rose-600);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-cream: var(--cream);
+  --font-sans: var(--font-noto-sans);
+}
+
+body {
+  background: radial-gradient(circle at top, #fff7f0 0%, var(--background) 55%, #fbe9e7 100%);
+  color: var(--foreground);
+  min-height: 100vh;
+}
+
+@layer components {
+  .game-card {
+    @apply rounded-3xl bg-white/90 shadow-xl shadow-rose-200/40 ring-1 ring-rose-100 backdrop-blur-sm min-[2400px]:rounded-[2.5rem]! min-[2400px]:ring-2!;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg min-[2400px]:min-h-24! min-[2400px]:rounded-3xl! min-[2400px]:px-12! min-[2400px]:py-8! min-[2400px]:text-4xl! bg-gradient-to-r from-rose-500 to-rose-400 text-white shadow-rose-300/50 hover:brightness-105;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg min-[2400px]:min-h-24! min-[2400px]:rounded-3xl! min-[2400px]:px-12! min-[2400px]:py-8! min-[2400px]:text-4xl! min-[2400px]:ring-4! bg-white text-rose-600 ring-2 ring-rose-300 hover:bg-rose-50;
+  }
+
+  .btn-gold {
+    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg min-[2400px]:min-h-24! min-[2400px]:rounded-3xl! min-[2400px]:px-12! min-[2400px]:py-8! min-[2400px]:text-4xl! bg-gradient-to-r from-gold-500 to-gold-300 text-[#5b3d0a] shadow-gold-400/40 hover:brightness-105;
+  }
+
+  .field-label {
+    @apply block text-sm font-semibold text-rose-700 sm:text-base min-[2400px]:text-2xl!;
+  }
+
+  .field-select {
+    @apply mt-1 block w-full min-h-12 rounded-xl border-2 border-rose-200 bg-white px-3 py-2 text-base text-foreground shadow-sm outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-200 min-[2400px]:min-h-20! min-[2400px]:rounded-2xl! min-[2400px]:border-4! min-[2400px]:px-5! min-[2400px]:py-4! min-[2400px]:text-2xl!;
+  }
+}

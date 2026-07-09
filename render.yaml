@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ai-bride-face-challenge
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: IMAGE_MODEL
+        value: gpt-image-2
+      - key: OPENAI_API_KEY
+        sync: false
