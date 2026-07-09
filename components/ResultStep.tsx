@@ -216,7 +216,9 @@ export default function ResultStep({
                       fontSize: "clamp(1.75rem,1rem+3vw,5rem)",
                     }}
                   >
-                    <span className="flex h-full w-full flex-col items-center justify-center gap-[0.35em] leading-tight">
+                    <span
+                      className="flex h-full w-full flex-col items-center justify-center gap-[0.35em] leading-tight"
+                    >
                       <span className="h-[0.35em] w-[0.35em] animate-ping rounded-full bg-gold-300" />
                       AI 正在畫新娘…… / Die KI zeichnet gerade die Braut ……
                     </span>
