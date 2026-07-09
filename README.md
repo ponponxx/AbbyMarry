@@ -73,20 +73,25 @@ phone B. This is intentional for privacy.
 This app must run as a live Next.js server (not a static export) because `/api/generate-image`
 needs to call OpenAI with a server-side secret. Deploy it as a Render **Web Service**:
 
+This project ships a [`Dockerfile`](Dockerfile), so Render builds and runs it as a Docker web
+service (multi-stage build: install deps → `npm run build` → slim runtime image running
+`npm start`). You don't need to set a build/start command manually — Render detects the
+`Dockerfile` and uses it automatically.
+
 1. Push the project to GitHub.
 2. In Render, create a new **Web Service** from the GitHub repo.
-3. Build command: `npm ci && npm run build`
-4. Start command: `npm start`
-5. Add environment variables in the Render dashboard:
+3. Environment: Render should auto-detect **Docker** from the `Dockerfile` at the repo root. If it
+   doesn't, set the environment/runtime to Docker manually in the service settings.
+4. Add environment variables in the Render dashboard:
    - `OPENAI_API_KEY` (your real key — set with "sync: false" so it's entered manually, never committed)
    - `IMAGE_MODEL=gpt-image-2`
-6. Deploy.
-7. Open the Render public HTTPS URL on phone / iPad / desktop.
-8. Before the wedding game starts, open `/api/health` once to wake the service (useful on Render's
+5. Deploy.
+6. Open the Render public HTTPS URL on phone / iPad / desktop.
+7. Before the wedding game starts, open `/api/health` once to wake the service (useful on Render's
    free plan, which sleeps after inactivity).
 
-A ready-to-use [`render.yaml`](render.yaml) is included at the project root and can be used with
-Render's "Blueprint" deploy flow.
+A ready-to-use [`render.yaml`](render.yaml) (configured for `runtime: docker`) is included at the
+project root and can be used with Render's "Blueprint" deploy flow.
 
 ### Health check
 
