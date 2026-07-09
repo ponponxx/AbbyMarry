@@ -53,6 +53,17 @@ body {
   min-height: 100vh;
 }
 
+@keyframes bride-photo-merge {
+  from {
+    opacity: 0.95;
+    transform: translate(34%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
 @layer components {
   .game-card {
     @apply bg-white/90 shadow-xl shadow-rose-200/40 ring-1 ring-rose-100 backdrop-blur-sm;

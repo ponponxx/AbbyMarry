@@ -125,23 +125,6 @@ export default function SetupStep({ bridePhoto, onPhotoSelected, onStart }: Setu
             遊戲主持人請先上傳新娘的照片。 / Der Spielleiter lädt zuerst ein Foto der Braut hoch.
           </p>
 
-          <div
-            className="mt-[1.5em] rounded-2xl bg-gold-300/25 text-[#6b4d10]"
-            style={{ padding: "clamp(1rem,0.8rem+1vw,2.5rem)", fontSize: "var(--text-body)" }}
-          >
-            <p>⚠️ 新娘照片只用於現場揭曉，不會送給 AI。</p>
-            <p className="mt-[0.3em]">
-              Das Foto der Braut wird nur für die spätere Enthüllung verwendet und nicht an die KI gesendet.
-            </p>
-            <p className="mt-[1em]" style={{ fontSize: "var(--text-small)" }}>
-              照片只會儲存在目前這台裝置的瀏覽器中，不會同步到其他手機或電腦。請全程使用同一台裝置。
-            </p>
-            <p style={{ fontSize: "var(--text-small)" }}>
-              Das Foto wird nur lokal im Browser dieses Geräts gespeichert und nicht mit anderen Geräten
-              synchronisiert. Bitte das gleiche Gerät während des gesamten Spiels verwenden.
-            </p>
-          </div>
-
           <div className="mt-[1.5em] flex justify-center lg:justify-start">
             <button type="button" className="btn-primary w-full sm:w-auto" disabled={!bridePhoto} onClick={onStart}>
               開始挑戰 / Herausforderung starten

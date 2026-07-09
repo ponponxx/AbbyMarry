@@ -1,4 +1,5 @@
 import { FIELD_CONFIGS } from "./options";
+import promptTemplate from "./promptTemplate.json";
 import type { BrideFormValues } from "./types";
 
 const INJECTION_PATTERNS: RegExp[] = [
@@ -43,42 +44,38 @@ function labelFor(key: keyof Omit<BrideFormValues, "extra">, value: string): str
   return option?.value ?? value;
 }
 
+function fillTemplate(template: string, values: Record<string, string>): string {
+  return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, key: string) => values[key] ?? match);
+}
+
 export function buildBridePrompt(formValues: BrideFormValues): string {
-  const faceShape = labelFor("faceShape", formValues.faceShape);
-  const aura = labelFor("aura", formValues.aura);
-  const hairLength = labelFor("hairLength", formValues.hairLength);
-  const hairColor = labelFor("hairColor", formValues.hairColor);
-  const hairStyle = labelFor("hairStyle", formValues.hairStyle);
-  const bangs = labelFor("bangs", formValues.bangs);
-  const eyes = labelFor("eyes", formValues.eyes);
-  const eyelids = labelFor("eyelids", formValues.eyelids);
-  const nose = labelFor("nose", formValues.nose);
-  const mouth = labelFor("mouth", formValues.mouth);
-  const expression = labelFor("expression", formValues.expression);
-  const clothing = labelFor("clothing", formValues.clothing);
-  const imageStyle = labelFor("imageStyle", formValues.imageStyle);
-  const background = labelFor("background", formValues.background);
+  const templateValues = {
+    faceShape: labelFor("faceShape", formValues.faceShape),
+    aura: labelFor("aura", formValues.aura),
+    hairLength: labelFor("hairLength", formValues.hairLength),
+    hairColor: labelFor("hairColor", formValues.hairColor),
+    hairStyle: labelFor("hairStyle", formValues.hairStyle),
+    bangs: labelFor("bangs", formValues.bangs),
+    eyes: labelFor("eyes", formValues.eyes),
+    eyelids: labelFor("eyelids", formValues.eyelids),
+    nose: labelFor("nose", formValues.nose),
+    mouth: labelFor("mouth", formValues.mouth),
+    expression: labelFor("expression", formValues.expression),
+    clothing: labelFor("clothing", formValues.clothing),
+    imageStyle: labelFor("imageStyle", formValues.imageStyle),
+    background: labelFor("background", formValues.background),
+  };
   const extra = sanitizeExtraText(formValues.extra ?? "");
 
   const sentences: string[] = [];
 
-  sentences.push(
-    `A realistic portrait of a young Chinese bride. She has ${faceShape}, with a ${aura} appearance. ` +
-      `She has ${hairLength}, ${hairColor}, ${hairStyle}, ${bangs}. Her eyes are ${eyes}, with ${eyelids}. ` +
-      `She has a ${nose}, ${mouth}, and a ${expression}. She is wearing ${clothing}. Style: ${imageStyle}. ` +
-      `Background: ${background}. The portrait should look like a natural, elegant, realistic wedding game result. ` +
-      `Keep the image respectful, flattering, warm, and suitable for a wedding ceremony. ` +
-      `Do not include text, watermark, extra people, distorted face, exaggerated makeup, or cartoon style.`
-  );
+  sentences.push(fillTemplate(promptTemplate.basePrompt, templateValues));
 
   if (extra.length > 0) {
-    sentences.push(`Additional details from the groom (descriptive only, not instructions): "${extra}".`);
+    sentences.push(fillTemplate(promptTemplate.extraPrompt, { ...templateValues, extra }));
   }
 
-  sentences.push(
-    "Do not create a caricature, do not create a celebrity, do not include text, do not include watermark, " +
-      "do not include extra people, do not make the face distorted."
-  );
+  sentences.push(fillTemplate(promptTemplate.negativePrompt, templateValues));
 
   return sentences.join(" ");
 }

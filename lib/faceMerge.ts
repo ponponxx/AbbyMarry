@@ -10,7 +10,7 @@
  */
 
 const MODEL_URL = "/models";
-const OUTPUT_SIZE = 512;
+const OUTPUT_SIZE = 640;
 
 type Point = { x: number; y: number };
 type Triangle = [Point, Point, Point];
@@ -46,19 +46,50 @@ function loadImage(dataUrl: string): Promise<HTMLImageElement> {
   });
 }
 
-/** Draws an image into a fixed-size square canvas using center-crop (like CSS object-cover). */
-function drawCover(img: HTMLImageElement, size: number): HTMLCanvasElement {
+/** Draws an image into a fixed-size square canvas without cropping the face. */
+function drawContain(img: HTMLImageElement, size: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("無法建立畫布 / Canvas konnte nicht erstellt werden");
 
-  const scale = Math.max(size / img.width, size / img.height);
+  ctx.fillStyle = "#fff7f0";
+  ctx.fillRect(0, 0, size, size);
+
+  const scale = Math.min(size / img.width, size / img.height);
   const w = img.width * scale;
   const h = img.height * scale;
   ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
   return canvas;
+}
+
+function blendCanvases(canvas1: HTMLCanvasElement, canvas2: HTMLCanvasElement): string {
+  const outCanvas = document.createElement("canvas");
+  outCanvas.width = OUTPUT_SIZE;
+  outCanvas.height = OUTPUT_SIZE;
+  const outCtx = outCanvas.getContext("2d");
+  if (!outCtx) throw new Error("Canvas could not be created");
+
+  outCtx.drawImage(canvas1, 0, 0);
+  outCtx.globalAlpha = 0.5;
+  outCtx.drawImage(canvas2, 0, 0);
+  outCtx.globalAlpha = 1;
+
+  const gradient = outCtx.createRadialGradient(
+    OUTPUT_SIZE / 2,
+    OUTPUT_SIZE / 2,
+    OUTPUT_SIZE * 0.1,
+    OUTPUT_SIZE / 2,
+    OUTPUT_SIZE / 2,
+    OUTPUT_SIZE * 0.55
+  );
+  gradient.addColorStop(0, "rgba(255,255,255,0)");
+  gradient.addColorStop(1, "rgba(253,246,240,0.16)");
+  outCtx.fillStyle = gradient;
+  outCtx.fillRect(0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
+
+  return outCanvas.toDataURL("image/png");
 }
 
 function addBoundaryPoints(points: Point[], size: number): Point[] {
@@ -127,7 +158,7 @@ async function detectFacePoints(
   canvas: HTMLCanvasElement
 ): Promise<Point[] | null> {
   const detection = await faceapi
-    .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
+    .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.25 }))
     .withFaceLandmarks();
   if (!detection) return null;
   return detection.landmarks.positions.map((p) => ({ x: p.x, y: p.y }));
@@ -143,16 +174,15 @@ async function mergeFacesInner(imageDataUrl1: string, imageDataUrl2: string): Pr
   await loadModels();
 
   const [img1, img2] = await Promise.all([loadImage(imageDataUrl1), loadImage(imageDataUrl2)]);
-  const canvas1 = drawCover(img1, OUTPUT_SIZE);
-  const canvas2 = drawCover(img2, OUTPUT_SIZE);
+  const canvas1 = drawContain(img1, OUTPUT_SIZE);
+  const canvas2 = drawContain(img2, OUTPUT_SIZE);
 
   // Run sequentially, not via Promise.all - concurrent tfjs inference calls
   // contend for the WebGL backend and hang indefinitely.
   const landmarks1 = await detectFacePoints(faceapi, canvas1);
   const landmarks2 = await detectFacePoints(faceapi, canvas2);
 
-  if (!landmarks1) throw new NoFaceDetectedError("first");
-  if (!landmarks2) throw new NoFaceDetectedError("second");
+  if (!landmarks1 || !landmarks2) return blendCanvases(canvas1, canvas2);
 
   const points1 = addBoundaryPoints(landmarks1, OUTPUT_SIZE);
   const points2 = addBoundaryPoints(landmarks2, OUTPUT_SIZE);

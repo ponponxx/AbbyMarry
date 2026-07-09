@@ -94,7 +94,6 @@ export const FIELD_CONFIGS: FieldConfig[] = [
       { zh: "雙眼皮", de: "Doppellider", value: "double eyelids" },
       { zh: "內雙", de: "Verdeckte Doppellider", value: "subtle double eyelids" },
       { zh: "單眼皮", de: "Monolider", value: "monolids" },
-      { zh: "不確定", de: "Nicht sicher", value: "natural eyelids" },
     ],
   },
   {

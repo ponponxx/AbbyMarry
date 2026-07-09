@@ -31,6 +31,8 @@ const DEFAULT_SCORES: ScoreValues = {
   overall: 3,
 };
 
+type ScoringStage = "compare" | "merge" | "final";
+
 function resultText(total: number): { zh: string; de: string } {
   if (total >= 20) {
     return { zh: "太強了，真的有把新娘放在心裡！", de: "Sehr stark, du hast deine Braut wirklich im Herzen!" };
@@ -62,7 +64,9 @@ export default function ResultStep({
   const [mergedImage, setMergedImage] = useState<string | null>(null);
   const [mergeError, setMergeError] = useState<string | null>(null);
   const [showResultPanel, setShowResultPanel] = useState(false);
-  const hasTriggeredMerge = useRef(false);
+  const [showScoringPanel, setShowScoringPanel] = useState(false);
+  const [scoringStage, setScoringStage] = useState<ScoringStage>("compare");
+  const stageTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const total = SCORE_ITEMS.reduce((sum, item) => sum + scores[item.key], 0);
   const summary = resultText(total);
@@ -81,11 +85,36 @@ export default function ResultStep({
 
   function handleRate(key: ScoreCategory, value: number) {
     setScores((prev) => ({ ...prev, [key]: value }));
+  }
 
-    if (!hasTriggeredMerge.current) {
-      hasTriggeredMerge.current = true;
+  function clearStageTimers() {
+    for (const timer of stageTimers.current) {
+      clearTimeout(timer);
+    }
+    stageTimers.current = [];
+  }
+
+  function handleOpenScoringPanel() {
+    if (!generatedImageDataUrl || !bridePhoto) return;
+
+    clearStageTimers();
+    setShowScoringPanel(true);
+    setScoringStage("compare");
+    setMergeError(null);
+
+    if (!mergedImage && !isMerging) {
       void handleMerge();
     }
+
+    stageTimers.current = [
+      setTimeout(() => setScoringStage("merge"), 900),
+      setTimeout(() => setScoringStage("final"), 2100),
+    ];
+  }
+
+  function handleCloseScoringPanel() {
+    clearStageTimers();
+    setShowScoringPanel(false);
   }
 
   async function handleMerge() {
@@ -98,7 +127,6 @@ export default function ResultStep({
     try {
       const result = await mergeFaces(generatedImageDataUrl, bridePhoto);
       setMergedImage(result);
-      setShowResultPanel(true);
     } catch (err) {
       if (err instanceof NoFaceDetectedError) {
         setMergeError(
@@ -155,10 +183,10 @@ export default function ResultStep({
             className="relative mt-[1.5em] grid grid-cols-1 sm:grid-cols-2"
             style={{ gap: "var(--space-gap-sm)" }}
           >
-            <div className="text-center">
+            <div className="mx-auto w-full max-w-[42rem] text-center">
               <p className="field-label mb-[0.5em]">AI 生成的新娘 / KI-generierte Braut</p>
               <div
-                className="relative aspect-square h-[clamp(16rem,58vh,45rem)] w-auto max-w-full overflow-hidden ring-rose-200"
+                className="relative mx-auto aspect-square w-full overflow-hidden ring-rose-200"
                 style={{
                   borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
                   boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--rose-200)",
@@ -168,7 +196,7 @@ export default function ResultStep({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={generatedImageDataUrl}
-                    alt="AI 生成的新娘 / KI-generierte Braut"
+                    alt="AI 新娘 / KI-generierte Braut"
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -181,21 +209,25 @@ export default function ResultStep({
                 )}
                 {isGenerating && (
                   <div
-                    className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent text-center font-semibold text-white"
-                    style={{ padding: "0.75em 1em", fontSize: "var(--text-small)" }}
+                    className="absolute left-1/2 top-1/2 flex h-[60%] w-[60%] -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white/75 text-center font-semibold text-rose-600 shadow-xl shadow-rose-200/40 backdrop-blur-sm"
+                    style={{
+                      borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
+                      padding: "0.75em 1em",
+                      fontSize: "clamp(1.75rem,1rem+3vw,5rem)",
+                    }}
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <span className="h-2 w-2 animate-ping rounded-full bg-gold-300" />
+                    <span className="flex h-full w-full flex-col items-center justify-center gap-[0.35em] leading-tight">
+                      <span className="h-[0.35em] w-[0.35em] animate-ping rounded-full bg-gold-300" />
                       AI 正在畫新娘…… / Die KI zeichnet gerade die Braut ……
                     </span>
                   </div>
                 )}
               </div>
             </div>
-            <div className="text-center">
-              <p className="field-label mb-[0.5em]">真正的新娘 / Die echte Braut</p>
+            <div className="mx-auto w-full max-w-[42rem] text-center">
+              <p className="field-label mb-[0.5em]">最美的新娘 / Die schönste Braut</p>
               <div
-                className="aspect-square h-[clamp(16rem,58vh,45rem)] w-auto max-w-full overflow-hidden ring-gold-400"
+                className="mx-auto aspect-square w-full overflow-hidden ring-gold-400"
                 style={{
                   borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
                   boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--gold-400)",
@@ -203,7 +235,7 @@ export default function ResultStep({
               >
                 {bridePhoto && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={bridePhoto} alt="真正的新娘" className="h-full w-full object-cover" />
+                  <img src={bridePhoto} alt="最美的新娘" className="h-full w-full object-cover" />
                 )}
               </div>
             </div>
@@ -211,7 +243,15 @@ export default function ResultStep({
         )}
 
         {isReady && (
-          <div className="mt-[2em]">
+          <div className="mt-[2em] flex justify-center">
+            <button type="button" className="btn-primary w-full sm:w-auto" onClick={handleOpenScoringPanel}>
+              AI 評分 / KI-Bewertung
+            </button>
+          </div>
+        )}
+
+        {false && isReady && (
+          <div className="fixed bottom-4 right-4 z-40 max-h-[calc(100vh-2rem)] w-[min(30rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl bg-white/95 p-4 shadow-2xl shadow-rose-300/40 ring-1 ring-rose-100 backdrop-blur">
             <h3 className="text-center font-black text-rose-600" style={{ fontSize: "var(--text-subtitle)" }}>
               新郎記憶力評分 / Gedächtniswertung des Bräutigams
             </h3>
@@ -256,7 +296,7 @@ export default function ResultStep({
           </div>
         )}
 
-        <div className="mt-[2em] flex flex-col justify-center gap-3 sm:flex-row">
+        <div className="hidden">
           <button type="button" className="btn-primary" onClick={onPlayAgain}>
             再玩一次 / Noch einmal spielen
           </button>
@@ -265,6 +305,168 @@ export default function ResultStep({
           </button>
         </div>
       </div>
+
+      {showScoringPanel && generatedImageDataUrl && bridePhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-4">
+          <div
+            className="game-card relative max-h-[96vh] w-[min(96vw,92rem)] overflow-y-auto"
+            style={{ padding: "var(--space-card-padding)", gap: "var(--space-gap)" }}
+          >
+            <button
+              type="button"
+              aria-label="Close"
+              className="absolute flex items-center justify-center rounded-full bg-rose-100 font-bold text-rose-600 hover:bg-rose-200"
+              style={{
+                top: "1em",
+                right: "1em",
+                height: "clamp(2.5rem,2rem+1.5vw,4rem)",
+                width: "clamp(2.5rem,2rem+1.5vw,4rem)",
+                fontSize: "clamp(1.25rem,1rem+0.8vw,2rem)",
+              }}
+              onClick={handleCloseScoringPanel}
+            >
+              x
+            </button>
+
+            <h3 className="pr-12 text-center font-black text-rose-600" style={{ fontSize: "var(--text-subtitle)" }}>
+              新郎記憶力評分 / Gedächtniswertung des Bräutigams
+            </h3>
+
+            {scoringStage !== "final" && (
+              <div className="mt-[1.5em]">
+                {scoringStage === "compare" ? (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="text-center">
+                      <p className="field-label mb-[0.5em]">AI 生成的新娘 / KI-generierte Braut</p>
+                      <div
+                        className="mx-auto aspect-square w-full max-w-[34rem] overflow-hidden ring-rose-200"
+                        style={{
+                          borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
+                          boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--rose-200)",
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={generatedImageDataUrl} alt="AI generated bride" className="h-full w-full object-cover" />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <p className="field-label mb-[0.5em]">最美的新娘 / Die schönste Braut</p>
+                      <div
+                        className="mx-auto aspect-square w-full max-w-[34rem] overflow-hidden ring-gold-400"
+                        style={{
+                          borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
+                          boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--gold-400)",
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={bridePhoto} alt="Real bride" className="h-full w-full object-cover" />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative mx-auto aspect-square w-full max-w-[38rem] overflow-hidden">
+                    <div
+                      className="absolute left-1/2 top-1/2 aspect-square w-[78%] -translate-x-1/2 -translate-y-1/2 overflow-hidden ring-rose-200"
+                      style={{
+                        borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
+                        boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--rose-200)",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={generatedImageDataUrl} alt="AI generated bride" className="h-full w-full object-cover" />
+                    </div>
+                    <div
+                      className="absolute left-1/2 top-1/2 aspect-square w-[78%] overflow-hidden ring-gold-400"
+                      style={{
+                        animation: "bride-photo-merge 1.1s ease-in-out forwards",
+                        borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
+                        boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--gold-400)",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={bridePhoto} alt="Real bride" className="h-full w-full object-cover" />
+                    </div>
+                  </div>
+                )}
+
+                <p className="mt-[1em] text-center font-semibold text-rose-500" style={{ fontSize: "var(--text-body)" }}>
+                  AI 正在合成評分圖片 / Die KI-Bewertung wird vorbereitet
+                </p>
+              </div>
+            )}
+
+            {scoringStage === "final" && (
+              <div
+                className="mt-[1.5em] grid grid-cols-1 items-start lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.85fr)]"
+                style={{ gap: "var(--space-gap)" }}
+              >
+                <div className="text-center">
+                  <p className="field-label mb-[0.5em]"> 像不像? / Wie ähnlich sieht sie der Braut? </p>
+                  <div
+                    className="mx-auto aspect-square w-full max-w-[38rem] overflow-hidden ring-gold-400"
+                    style={{
+                      borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
+                      boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--gold-400)",
+                    }}
+                  >
+                    {mergedImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={mergedImage} alt="Merged bride" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-rose-50">
+                        <span
+                          className="animate-spin rounded-full border-rose-200 border-t-rose-500"
+                          style={{
+                            height: "clamp(2.5rem,2rem+1.5vw,5rem)",
+                            width: "clamp(2.5rem,2rem+1.5vw,5rem)",
+                            borderWidth: "clamp(0.25rem,0.2rem+0.2vw,0.5rem)",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {(isMerging || (!mergedImage && !mergeError)) && (
+                    <p className="mt-[1em] font-semibold text-rose-500" style={{ fontSize: "var(--text-body)" }}>
+                      正在分析臉部特徵 / Gesichtsmerkmale werden analysiert
+                    </p>
+                  )}
+                  {mergeError && (
+                    <p
+                      className="mt-[1em] rounded-xl bg-rose-100 text-center font-semibold text-rose-700"
+                      style={{ padding: "0.75em", fontSize: "var(--text-body)" }}
+                    >
+                      {mergeError}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex h-full min-h-0 flex-col text-center lg:max-h-[min(38rem,78vh)] lg:text-left">
+                  <p className="font-black text-gold-500" style={{ fontSize: "var(--text-score)" }}>
+                    {total} / 25
+                  </p>
+                  <div className="mt-[0.75em] flex flex-1 flex-col justify-evenly" style={{ gap: "clamp(0.25rem,0.2rem+0.35vw,0.75rem)" }}>
+                    {SCORE_ITEMS.map((item) => (
+                      <StarRating
+                        key={item.key}
+                        labelZh={item.labelZh}
+                        labelDe={item.labelDe}
+                        value={scores[item.key]}
+                        onChange={(value) => handleRate(item.key, value)}
+                      />
+                    ))}
+                  </div>
+                  <p className="mt-[0.75em] font-semibold text-rose-600" style={{ fontSize: "var(--text-heading)" }}>
+                    {summary.zh}
+                  </p>
+                  <p className="mt-[0.25em] text-foreground/60" style={{ fontSize: "var(--text-body)" }}>
+                    {summary.de}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showResultPanel && mergedImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">

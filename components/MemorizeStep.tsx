@@ -66,10 +66,10 @@ export default function MemorizeStep({ bridePhoto, onDone }: MemorizeStepProps) 
 
         <div className="mt-[1.5em] lg:mt-0">
           <p className="font-semibold text-rose-600" style={{ fontSize: "var(--text-heading)" }}>
-            新郎請仔細看，等一下只能靠記憶描述新娘。
+            新郎請仔細看，等一下要把你心中最美的新娘描述給 AI。
           </p>
           <p className="mt-[0.5em] text-foreground/70" style={{ fontSize: "var(--text-body)" }}>
-            Bräutigam, schau genau hin. Danach darfst du sie nur aus dem Gedächtnis beschreiben.
+            Bräutigam, schau genau hin. Gleich beschreibst du der KI die schönste Braut in deinem Herzen.
           </p>
 
           <div
