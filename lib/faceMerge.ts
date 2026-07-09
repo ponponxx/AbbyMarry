@@ -182,7 +182,7 @@ async function mergeFacesInner(imageDataUrl1: string, imageDataUrl2: string): Pr
   const landmarks1 = await detectFacePoints(faceapi, canvas1);
   const landmarks2 = await detectFacePoints(faceapi, canvas2);
 
-  if (!landmarks1 || !landmarks2) return blendCanvases(canvas1, canvas2);
+  if (!landmarks1 || !landmarks2) return blendCanvases(canvas2, canvas1);
 
   const points1 = addBoundaryPoints(landmarks1, OUTPUT_SIZE);
   const points2 = addBoundaryPoints(landmarks2, OUTPUT_SIZE);

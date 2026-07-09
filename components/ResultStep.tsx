@@ -368,25 +368,25 @@ export default function ResultStep({
                 ) : (
                   <div className="relative mx-auto aspect-square w-full max-w-[38rem] overflow-hidden">
                     <div
-                      className="absolute left-1/2 top-1/2 aspect-square w-[78%] -translate-x-1/2 -translate-y-1/2 overflow-hidden ring-rose-200"
+                      className="absolute left-1/2 top-1/2 aspect-square w-[78%] -translate-x-1/2 -translate-y-1/2 overflow-hidden ring-gold-400"
                       style={{
-                        borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
-                        boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--rose-200)",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={generatedImageDataUrl} alt="AI generated bride" className="h-full w-full object-cover" />
-                    </div>
-                    <div
-                      className="absolute left-1/2 top-1/2 aspect-square w-[78%] overflow-hidden ring-gold-400"
-                      style={{
-                        animation: "bride-photo-merge 1.1s ease-in-out forwards",
                         borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
                         boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--gold-400)",
                       }}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={bridePhoto} alt="Real bride" className="h-full w-full object-cover" />
+                    </div>
+                    <div
+                      className="absolute left-1/2 top-1/2 aspect-square w-[78%] overflow-hidden ring-rose-200"
+                      style={{
+                        animation: "bride-photo-merge 1.1s ease-in-out forwards",
+                        borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
+                        boxShadow: "0 0 0 clamp(0.25rem,0.2rem+0.2vw,0.5rem) var(--rose-200)",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={generatedImageDataUrl} alt="AI generated bride" className="h-full w-full object-cover" />
                     </div>
                   </div>
                 )}
