@@ -12,6 +12,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "delaunator": "^5.1.0",
+    "face-api.js": "^0.22.2",
     "next": "16.2.10",
     "openai": "^6.45.0",
     "react": "19.2.4",

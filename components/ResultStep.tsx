@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import StarRating from "./StarRating";
+import { mergeFaces, NoFaceDetectedError } from "@/lib/faceMerge";
 import type { ScoreCategory, ScoreValues } from "@/lib/types";
 
 type ResultStepProps = {
@@ -58,6 +59,9 @@ export default function ResultStep({
   const [revealed, setRevealed] = useState(false);
   const [scores, setScores] = useState<ScoreValues>(DEFAULT_SCORES);
   const [copied, setCopied] = useState(false);
+  const [isMerging, setIsMerging] = useState(false);
+  const [mergedImage, setMergedImage] = useState<string | null>(null);
+  const [mergeError, setMergeError] = useState<string | null>(null);
 
   const total = SCORE_ITEMS.reduce((sum, item) => sum + scores[item.key], 0);
   const summary = resultText(total);
@@ -70,6 +74,31 @@ export default function ResultStep({
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
+    }
+  }
+
+  async function handleMerge() {
+    if (!generatedImageDataUrl || !bridePhoto) return;
+
+    setIsMerging(true);
+    setMergeError(null);
+    setMergedImage(null);
+
+    try {
+      const result = await mergeFaces(generatedImageDataUrl, bridePhoto);
+      setMergedImage(result);
+    } catch (err) {
+      if (err instanceof NoFaceDetectedError) {
+        setMergeError(
+          "偵測不到清楚的臉，無法合成，請換一張角度更正面的照片再試一次。 / Es konnte kein klares Gesicht erkannt werden, daher ist die Zusammenführung nicht möglich. Bitte versuche es mit einem Foto mit einer frontaleren Ansicht."
+        );
+      } else {
+        setMergeError(
+          "合成失敗，請再試一次。 / Die Zusammenführung ist fehlgeschlagen, bitte versuche es erneut."
+        );
+      }
+    } finally {
+      setIsMerging(false);
     }
   }
 
@@ -162,6 +191,53 @@ export default function ResultStep({
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {!isGenerating && revealed && generatedImageDataUrl && bridePhoto && (
+            <div className="mt-6 min-[2400px]:mt-14!">
+              {!mergedImage && (
+                <div className="flex justify-center">
+                  <button type="button" className="btn-secondary" onClick={handleMerge} disabled={isMerging}>
+                    {isMerging ? "合成中… / Wird zusammengeführt…" : "合成新娘 / Braut zusammenführen"}
+                  </button>
+                </div>
+              )}
+
+              {isMerging && (
+                <p className="mt-4 text-center text-sm font-semibold text-rose-500 sm:text-base min-[2400px]:mt-8! min-[2400px]:text-3xl!">
+                  正在分析兩張臉的特徵並融合……第一次載入模型可能要多等一下。
+                  <br />
+                  Die Gesichtsmerkmale werden analysiert und zusammengeführt … das erste Laden des Modells kann
+                  etwas dauern.
+                </p>
+              )}
+
+              {mergeError && (
+                <p className="mt-4 rounded-xl bg-rose-100 p-3 text-center text-sm font-semibold text-rose-700 min-[2400px]:mt-8! min-[2400px]:rounded-2xl! min-[2400px]:p-6! min-[2400px]:text-2xl!">
+                  {mergeError}
+                </p>
+              )}
+
+              {mergedImage && (
+                <div className="text-center">
+                  <p className="field-label mb-2 min-[2400px]:mb-4!">合成新娘 / Verschmolzene Braut</p>
+                  <div className="mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl ring-4 ring-gold-400 lg:h-[42vh] lg:w-auto lg:max-w-none min-[2400px]:h-[44vh]! min-[2400px]:rounded-3xl! min-[2400px]:ring-8!">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={mergedImage} alt="合成新娘 / Verschmolzene Braut" className="h-full w-full object-cover" />
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-secondary mt-4 min-[2400px]:mt-8!"
+                    onClick={() => {
+                      setMergedImage(null);
+                      setMergeError(null);
+                    }}
+                  >
+                    重新合成 / Erneut zusammenführen
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
