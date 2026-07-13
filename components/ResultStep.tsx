@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { mergeFaces, MergeTimeoutError, NoFaceDetectedError } from "@/lib/faceMerge";
+import { scoreImageSimilarity } from "@/lib/faceSimilarity";
 import type { ScoreCategory, ScoreValues } from "@/lib/types";
 
 type ResultStepProps = {
@@ -63,6 +64,8 @@ export default function ResultStep({
   const [isMerging, setIsMerging] = useState(false);
   const [mergedImage, setMergedImage] = useState<string | null>(null);
   const [mergeError, setMergeError] = useState<string | null>(null);
+  const [isAnalyzingScore, setIsAnalyzingScore] = useState(false);
+  const [scoreError, setScoreError] = useState<string | null>(null);
   const [showResultPanel, setShowResultPanel] = useState(false);
   const [showScoringPanel, setShowScoringPanel] = useState(false);
   const [scoringStage, setScoringStage] = useState<ScoringStage>("compare");
@@ -101,10 +104,13 @@ export default function ResultStep({
     setShowScoringPanel(true);
     setScoringStage("compare");
     setMergeError(null);
+    setScoreError(null);
 
     if (!mergedImage && !isMerging) {
       void handleMerge();
     }
+
+    void handleAnalyzeScore();
 
     stageTimers.current = [
       setTimeout(() => setScoringStage("merge"), 900),
@@ -143,6 +149,22 @@ export default function ResultStep({
       }
     } finally {
       setIsMerging(false);
+    }
+  }
+
+  async function handleAnalyzeScore() {
+    if (!generatedImageDataUrl || !bridePhoto || isAnalyzingScore) return;
+
+    setIsAnalyzingScore(true);
+    setScoreError(null);
+
+    try {
+      const analyzedScores = await scoreImageSimilarity(generatedImageDataUrl, bridePhoto);
+      setScores(analyzedScores);
+    } catch {
+      setScoreError("影像評分失敗，已保留手動評分 / Bildbewertung fehlgeschlagen, manuelle Bewertung bleibt möglich.");
+    } finally {
+      setIsAnalyzingScore(false);
     }
   }
 
@@ -446,6 +468,14 @@ export default function ResultStep({
                   <p className="font-black text-gold-500" style={{ fontSize: "var(--text-score)" }}>
                     {total} / 25
                   </p>
+                  {(isAnalyzingScore || scoreError) && (
+                    <p
+                      className={`mt-[0.25em] font-semibold ${scoreError ? "text-rose-600" : "text-foreground/60"}`}
+                      style={{ fontSize: "var(--text-small)" }}
+                    >
+                      {scoreError ?? "正在用本機圖像辨識計算分數 / Lokale Bildanalyse berechnet die Punktzahl"}
+                    </p>
+                  )}
                   <div className="mt-[0.75em] flex flex-1 flex-col justify-evenly" style={{ gap: "clamp(0.25rem,0.2rem+0.35vw,0.75rem)" }}>
                     {SCORE_ITEMS.map((item) => (
                       <StarRating
