@@ -62,8 +62,8 @@ export function buildBridePrompt(formValues: BrideFormValues): string {
     mouth: labelFor("mouth", formValues.mouth),
     expression: labelFor("expression", formValues.expression),
     clothing: labelFor("clothing", formValues.clothing),
-    imageStyle: labelFor("imageStyle", formValues.imageStyle),
-    background: labelFor("background", formValues.background),
+    nationality: labelFor("nationality", formValues.nationality),
+    personality: labelFor("personality", formValues.personality),
   };
   const extra = sanitizeExtraText(formValues.extra ?? "");
 

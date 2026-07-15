@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { mergeFaces, MergeTimeoutError, NoFaceDetectedError } from "@/lib/faceMerge";
 import { scoreImageSimilarity } from "@/lib/faceSimilarity";
@@ -12,9 +12,18 @@ type ResultStepProps = {
   bridePhoto: string | null;
   generationError?: string | null;
   isGenerating: boolean;
+  generationStartedAt: number | null;
+  partialImageCount: number;
   onPlayAgain: () => void;
   onBackToSetup: () => void;
 };
+
+const ESTIMATED_GENERATION_SECONDS = 45;
+const PARTIAL_PROGRESS_LABELS = [
+  "AI 正在起稿 / Skizze wird aufgebaut",
+  "AI 正在細修五官 / Gesicht wird verfeinert",
+  "AI 正在收尾 / Fast fertig",
+] as const;
 
 const SCORE_ITEMS: { key: ScoreCategory; labelZh: string; labelDe: string }[] = [
   { key: "hair", labelZh: "髮型", labelDe: "Frisur" },
@@ -56,6 +65,8 @@ export default function ResultStep({
   bridePhoto,
   generationError,
   isGenerating,
+  generationStartedAt,
+  partialImageCount,
   onPlayAgain,
   onBackToSetup,
 }: ResultStepProps) {
@@ -69,12 +80,28 @@ export default function ResultStep({
   const [showResultPanel, setShowResultPanel] = useState(false);
   const [showScoringPanel, setShowScoringPanel] = useState(false);
   const [scoringStage, setScoringStage] = useState<ScoringStage>("compare");
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
   const stageTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const total = SCORE_ITEMS.reduce((sum, item) => sum + scores[item.key], 0);
   const summary = resultText(total);
   const hasFailed = !isGenerating && !generatedImageDataUrl;
   const isReady = !isGenerating && !hasFailed;
+  const elapsedSeconds =
+    isGenerating && generationStartedAt ? Math.max(0, Math.floor((currentTime - generationStartedAt) / 1000)) : 0;
+  const remainingSeconds = Math.max(0, ESTIMATED_GENERATION_SECONDS - elapsedSeconds);
+  const countdownLabel = remainingSeconds > 0 ? `${remainingSeconds}s` : "即將完成… / Gleich fertig…";
+  const partialProgressLabel =
+    partialImageCount > 0
+      ? PARTIAL_PROGRESS_LABELS[Math.min(partialImageCount - 1, PARTIAL_PROGRESS_LABELS.length - 1)]
+      : "AI 正在努力畫圖 / Die KI arbeitet gerade";
+
+  useEffect(() => {
+    if (!isGenerating || !generationStartedAt) return;
+
+    const interval = window.setInterval(() => setCurrentTime(Date.now()), 250);
+    return () => window.clearInterval(interval);
+  }, [generationStartedAt, isGenerating]);
 
   async function handleCopyPrompt() {
     try {
@@ -231,18 +258,31 @@ export default function ResultStep({
                 )}
                 {isGenerating && (
                   <div
-                    className="absolute left-1/2 top-1/2 flex h-[60%] w-[60%] -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white/75 text-center font-semibold text-rose-600 shadow-xl shadow-rose-200/40 backdrop-blur-sm"
+                    className="absolute left-1/2 top-1/2 flex h-[68%] w-[72%] -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white/78 text-center font-semibold text-rose-600 shadow-xl shadow-rose-200/40 backdrop-blur-sm"
                     style={{
                       borderRadius: "clamp(1rem,0.8rem+0.7vw,2rem)",
                       padding: "0.75em 1em",
-                      fontSize: "clamp(1.75rem,1rem+3vw,5rem)",
+                      fontSize: "clamp(1.2rem,0.85rem+2vw,3.2rem)",
                     }}
                   >
-                    <span
-                      className="flex h-full w-full flex-col items-center justify-center gap-[0.35em] leading-tight"
-                    >
+                    <span className="flex h-full w-full flex-col items-center justify-center gap-[0.45em] leading-tight">
                       <span className="h-[0.35em] w-[0.35em] animate-ping rounded-full bg-gold-300" />
-                      AI 正在畫新娘…… / Die KI zeichnet gerade die Braut ……
+                      <span>AI 正在畫新娘…… / Die KI zeichnet gerade die Braut ……</span>
+                      <span
+                        className="rounded-full bg-rose-100/90 text-rose-700"
+                        style={{
+                          padding: "0.25em 0.7em",
+                          fontSize: "clamp(1rem,0.8rem+1vw,2rem)",
+                        }}
+                      >
+                        約 {countdownLabel}
+                      </span>
+                      <span
+                        className="text-foreground/70"
+                        style={{ fontSize: "clamp(0.85rem,0.72rem+0.55vw,1.2rem)" }}
+                      >
+                        {partialProgressLabel}
+                      </span>
                     </span>
                   </div>
                 )}

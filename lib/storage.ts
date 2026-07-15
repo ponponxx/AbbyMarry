@@ -1,4 +1,5 @@
 import type { BrideFormValues, ScoreValues } from "./types";
+import { FIELD_CONFIGS, getDefaultFormValues } from "./options";
 
 export const STORAGE_KEYS = {
   bridePhoto: "bride-photo-data-url",
@@ -54,7 +55,21 @@ export function getFormValues(): BrideFormValues | null {
   const raw = safeGet(STORAGE_KEYS.formValues);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as BrideFormValues;
+    const stored = JSON.parse(raw) as Record<string, unknown>;
+    const values = getDefaultFormValues();
+
+    for (const field of FIELD_CONFIGS) {
+      const storedValue = stored[field.key];
+      if (typeof storedValue === "string" && field.options.some((option) => option.value === storedValue)) {
+        values[field.key] = storedValue;
+      }
+    }
+
+    if (typeof stored.extra === "string") {
+      values.extra = stored.extra.slice(0, 240);
+    }
+
+    return values;
   } catch {
     return null;
   }

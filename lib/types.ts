@@ -24,8 +24,8 @@ export type BrideFormValues = {
   mouth: string;
   expression: string;
   clothing: string;
-  imageStyle: string;
-  background: string;
+  nationality: string;
+  personality: string;
   extra: string;
 };
 

@@ -32,6 +32,8 @@ export default function GameShell() {
   const [generatedPrompt, setGeneratedPrompt] = useState<string>("");
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStartedAt, setGenerationStartedAt] = useState<number | null>(null);
+  const [partialImageCount, setPartialImageCount] = useState(0);
 
   // Reading localStorage must happen client-side only (post-mount) so the server-rendered
   // markup and the first client render stay in sync; the `hydrated` gate below hides the
@@ -61,6 +63,8 @@ export default function GameShell() {
     setGenerationError(null);
     setGeneratedImage(null);
     setGeneratedPrompt(prompt);
+    setGenerationStartedAt(Date.now());
+    setPartialImageCount(0);
     // Jump to the reveal card immediately so the groom (and the room, if this is
     // projected) watches the portrait get drawn live instead of staring at a form.
     setStep("result");
@@ -96,6 +100,9 @@ export default function GameShell() {
           if (event.type === "partial" || event.type === "completed") {
             const dataUrl = `data:${event.mimeType};base64,${event.imageBase64}`;
             setGeneratedImage(dataUrl);
+            if (event.type === "partial") {
+              setPartialImageCount((prev) => Math.max(prev, event.index + 1));
+            }
             if (event.type === "completed") {
               persistGeneratedImage(dataUrl);
             }
@@ -116,6 +123,8 @@ export default function GameShell() {
     setGeneratedImage(null);
     setGenerationError(null);
     setGeneratedPrompt("");
+    setGenerationStartedAt(null);
+    setPartialImageCount(0);
     setStep(bridePhoto ? "memorize" : "setup");
   }
 
@@ -124,6 +133,8 @@ export default function GameShell() {
     setGeneratedImage(null);
     setGenerationError(null);
     setGeneratedPrompt("");
+    setGenerationStartedAt(null);
+    setPartialImageCount(0);
     setStep("setup");
   }
 
@@ -157,6 +168,8 @@ export default function GameShell() {
           bridePhoto={bridePhoto}
           generationError={generationError}
           isGenerating={isGenerating}
+          generationStartedAt={generationStartedAt}
+          partialImageCount={partialImageCount}
           onPlayAgain={handlePlayAgain}
           onBackToSetup={handleBackToSetup}
         />
